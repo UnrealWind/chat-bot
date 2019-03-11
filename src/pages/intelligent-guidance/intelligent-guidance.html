@@ -1,0 +1,333 @@
+<ion-content >
+  <ion-list>
+    <div class="infi-box">
+      <ul>
+        <li *ngFor="let question of questionList;let index = index">
+          <div class="question question1" *ngIf="question.nodeType == 'basic'">
+            <div *ngIf="question.answer" class="shadow"></div>
+            <div *ngFor="let quest of question.data">
+              <ion-list-header *ngIf="quest.type !== 'smallText'">
+                {{quest.context}}
+              </ion-list-header>
+              <div *ngIf="quest.type == 'radio'">
+                <div class="radioBtn"  *ngFor="let opt of quest.options;let idx = index">
+                  <div class="click-btn" (click)="checkRadio(opt,quest)"></div>
+                  <ion-item>
+                    <ion-label >{{opt.value}}</ion-label>
+                    <ion-checkbox checked="{{quest.answer[opt.value].kid == opt.kid}}"></ion-checkbox>
+                  </ion-item>
+                </div>
+              </div>
+
+              <div *ngIf="quest.type == 'smallText'">
+                <!--<ion-item>
+                  <ion-input  [(ngModel)]="quest.options[0]['value']" type="text" placeholder="请输入{{quest.name}}"></ion-input>
+                </ion-item>-->
+
+                <ion-item>
+                  <ion-label fixed>{{quest.context}}</ion-label>
+                  <ion-input [(ngModel)]="quest.options[0]['value']" type="text"  value=""></ion-input>
+                  <ion-note *ngIf="quest.options[0]" item-end>
+                    {{quest.options[0].unit}}
+                  </ion-note>
+                </ion-item>
+
+              </div>
+            </div>
+            <div class="btn-group">
+              <button  (click)="answer(question,index)" ion-button round>确定</button>
+            </div>
+          </div>
+
+          <div *ngIf="question.nodeType  == 'symptom'">
+            <div  class="question">
+              <p>请您描述一下您的症状</p>
+            </div>
+
+            <div *ngIf="!question.answer" class="question-symptom">
+              <div class="symptom">
+                <ul *ngIf="question.data && question.data.length>0">
+                  <li *ngFor="let options of question.data">
+                    <a [ngClass]="{'active':options.active}" (click)="changeSymptom(options,question)">{{options.value}}</a>
+                  </li>
+                  <li>
+                    <a (click)="moreSymptom(index)">更多<ion-icon name="md-arrow-down"></ion-icon></a>
+                  </li>
+
+                  <scroll *ngIf="!question.answer"></scroll>
+                </ul>
+                <div class="error-tip" *ngIf="!question.data || question.data.length==0">
+                  没有查询到数据，请重新输入！！
+                </div>
+              </div>
+              <div class="checkedSymptom">
+                <a>
+                  <button class="special-large-btn" *ngIf="question.answerListKeys&&question.answerListKeys.length>0" (click)="answer(question,index)" large="true"  ion-button round>
+                    <span *ngIf="question.answerListKeys && question.answerListKeys.length>0">{{question.answerListKeys.length}}</span>
+                    <ion-icon name="ios-paper-plane"></ion-icon>
+                  </button>
+                </a>
+                <a class="scroll-icon">
+                  <ion-icon ios="ios-arrow-forward" md="md-arrow-forward"></ion-icon>
+                  <ion-icon ios="ios-arrow-forward" md="md-arrow-forward"></ion-icon>
+                </a>
+                <ion-scroll *ngIf="question.answerListKeys&&question.answerListKeys.length>0" scrollX="true">
+                  <ul class="">
+                    <li *ngFor="let key of question.answerListKeys">
+                      <a *ngIf="question.answerList[key].active" (click)="changeSymptom(question.answerList[key],question)">{{question.answerList[key].value}}</a>
+                    </li>
+                  </ul>
+                </ion-scroll>
+                <div class="tip"  *ngIf="!question.answerListKeys||question.answerListKeys.length==0"> 左右滑动查看更多 </div>
+              </div>
+              <ion-searchbar (click)="scrollKeyBoard()" (ionInput)="getSymptom($event,index)" placeholder="请输入症状"></ion-searchbar>
+            </div>
+          </div>
+
+          <div *ngIf="question.nodeType  == 'related'">
+            <div  class="question">
+              <p>请您描述一下您的关联症状</p>
+            </div>
+
+            <div *ngIf="!question.answer" class="question-symptom">
+              <div class="symptom">
+                <ul *ngIf="question.data && question.data.length>0">
+                  <li *ngFor="let options of question.data">
+                    <a [ngClass]="{'active':options.active}" (click)="changeSymptom(options,question)">{{options.value}}</a>
+                  </li>
+                  <scroll *ngIf="!question.answer"></scroll>
+                </ul>
+                <div class="error-tip" *ngIf="!question.data || question.data.length==0">
+                  没有查询到数据，请重新输入！！
+                </div>
+              </div>
+              <div class="btn-group">
+                <button class="margin-top" (click)="answer(question,index)" ion-button round>
+                  确定
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="attr" *ngIf="question.nodeType == 'attribute' ||question.nodeType == 'history' ||
+           question.nodeType == 'exam'|| question.nodeType == 'test'|| question.nodeType == 'allergy'">
+            <div  class="question" *ngIf="question.nodeType == 'attribute'">
+              <p>请您描述一下您的{{question.data[0].parentName}}症状属性</p>
+            </div>
+            <div  class="question" *ngIf="question.nodeType == 'exam'">
+              <p>请您描述一下您的检查属性</p>
+            </div>
+            <div  class="question" *ngIf="question.nodeType == 'test'">
+              <p>请您描述一下您的检验属性</p>
+            </div>
+            <div  class="question" *ngIf="question.nodeType == 'history'">
+              <p>请您描述一下您的疾病史</p>
+            </div>
+            <div  class="question" *ngIf="question.nodeType == 'allergy'">
+              <p>请您描述一下您的过敏史</p>
+            </div>
+            <div *ngIf="!question.answer" class="question-symptom">
+              <div *ngFor="let quest of question.data;let idx = index">
+                <ion-list-header *ngIf="quest.type!=='smallText'">
+                  {{idx+1}}/{{question.data.length}} {{quest.context}}
+                </ion-list-header>
+                <div *ngIf="quest.type == 'radio'">
+                  <div class="radioBtn"  *ngFor="let opt of quest.options;let idx = index">
+                    <div class="click-btn" (click)="checkRadio(opt,quest)"></div>
+                    <ion-item>
+                      <ion-label >{{opt.value}}</ion-label>
+                      <ion-checkbox checked="{{quest.answer[opt.value].kid == opt.kid}}"></ion-checkbox>
+                    </ion-item>
+                  </div>
+                </div>
+
+                <div class="checkbox" *ngIf="quest.type == 'checkbox'">
+                  <div class="radioBtn"  *ngFor="let opt of quest.options;let idx = index">
+                    <div class="click-btn" (click)="checkCheckbox(opt,quest)"></div>
+                    <ion-item>
+                      <ion-label >{{opt.value}}</ion-label>
+                      <ion-checkbox checked="{{quest.answer[opt.value]['kid'] == opt.kid}}"></ion-checkbox>
+                    </ion-item>
+                  </div>
+                </div>
+
+                <div *ngIf="quest.type == 'smallText'">
+                  <!--<ion-item>
+                    <ion-input (click)="scrollKeyBoard($event)"  [(ngModel)]="quest.options[0]['value']" type="text" placeholder="请输入{{quest.name}}"></ion-input>
+                  </ion-item>-->
+                  <ion-item>
+                    <ion-label fixed>{{quest.context}}</ion-label>
+                    <ion-input (click)="scrollKeyBoard($event)"  [(ngModel)]="quest.options[0]['value']" type="text"  value=""></ion-input>
+                    <ion-note *ngIf="quest.options[0]" item-end>
+                      {{quest.options[0].unit}}
+                    </ion-note>
+                  </ion-item>
+
+                </div>
+              </div>
+              <div class="btn-group border-top">
+                <button  class="margin-top" (click)="answer(question,index)" ion-button round>确定</button>
+              </div>
+              <scroll *ngIf="!question.answer"></scroll>
+            </div>
+
+          </div>
+
+          <div class="finally" *ngIf="question.nodeType == 'report' ">
+            <div  class="question-symptom no-padding">
+              <div class="finally">
+                <ion-list-header>
+                  问诊报告
+                </ion-list-header>
+                <div *ngIf="question.data.length>0" class="">
+                  <ion-list>
+                    <div *ngFor="let opt of question.data">
+                        <!--<ion-list-header>
+                          {{opt.name}}
+                        </ion-list-header>-->
+                        <ion-item>
+                          <ion-note item-start>
+                            {{opt.name}}
+                          </ion-note>
+                          <p *ngIf="opt.value && opt.value.length>0 && !opt.value[0].value">{{opt.value}}</p>
+                          <p *ngIf="opt.value && opt.value.length>0 && opt.value[0].value">
+                            <span *ngFor="let exam of opt.value">
+                                <p>{{exam.name}}:{{exam.value}}</p>
+                            </span>
+                          </p>
+
+                        </ion-item>
+                    </div>
+                  </ion-list>
+                </div>
+                <div class="btn-group">
+                  <button  (click)="backWx(question)" ion-button round>确定</button>
+                </div>
+              </div>
+            </div>
+            <div class="question-symptom" [hidden]="true">
+              <scroll  *ngIf="question.data.length>0"></scroll>
+            </div>
+          </div>
+
+          <div *ngIf="question.nodeType == 'remote'">
+            <div  class="question-symptom no-padding">
+              <div class="finally">
+                <ion-list-header>
+                  为您推荐科室
+                </ion-list-header>
+                <p *ngIf="question.data.length==0">暂无推荐科室！</p>
+                <p *ngIf="question.data.length>0">根据您描述的症状，建议您优先选择以下科室就诊</p>
+                <div *ngIf="question.data.length>0" class="infi-row">
+                  <div class="infi-md-4" *ngFor="let options of question.data">
+                    <div (click)="jump(options)">
+                      <p class="big-font">{{options.dept_name}}</p>
+                      <p>{{options.ratio}}%</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="question-symptom" [hidden]="true">
+              <scroll  *ngIf="question.data.length>0"></scroll>
+            </div>
+          </div>
+
+          <div *ngIf="question.nodeType == 'remoteillness'">
+            <div class="question-symptom no-padding question-disease">
+              <div class="finally">
+                <ion-list-header>
+                  可能患的病症
+                </ion-list-header>
+                <p *ngIf="question.data.include.length==0">暂无推荐！</p>
+                <ion-list inset no-lines *ngIf="question.data.include.length>0">
+                  <ion-item *ngFor="let opt of question.data.include">
+                    <h2>{{opt.label}}</h2>
+                    <p [ngClass]="{'shown':!opt.shown}">
+                      <span>
+                        <span ng-if="opt.rule_desc">{{opt.rule_desc}}</span>
+                        <span ng-if="!opt.rule_desc">-</span>
+                        <span *ngFor="let desc of opt.desc">
+                          <h6>{{desc.title}}</h6>
+                          <p *ngIf="desc.desc">{{desc.desc}}</p>
+                          <p *ngIf="!desc.desc">-</p>
+                        </span>
+                      </span>
+                    </p>
+                    <button (click)="showDesc(opt)" ion-button clear item-end>
+                      <span *ngIf="opt.dept_name && opt.dept_name!=='None'">{{opt.dept_name}}</span>
+                      <ion-icon *ngIf="!opt.shown" ios="ios-arrow-forward" md="md-arrow-forward"></ion-icon>
+                      <ion-icon *ngIf="opt.shown" ios="ios-arrow-down" md="md-arrow-down"></ion-icon>
+                    </button>
+                  </ion-item>
+                </ion-list>
+              </div>
+            </div>
+            <div class="question-symptom" [hidden]="true">
+              <scroll  *ngIf="question.data && question.data.include.length>0"></scroll>
+            </div>
+          </div>
+
+          <div *ngIf="question.nodeType == 'newRemoteillness'">
+            <div class="question-symptom no-padding question-disease">
+              <div class="finally">
+                <ion-list-header class="no-marginBottom"  (click)="showRemoteillDetail('disease')">
+                  可能患的病症
+                  <ion-icon *ngIf="!diseaseShow" color="primary" item-end ios="ios-arrow-forward" md="md-arrow-forward"></ion-icon>
+                  <ion-icon *ngIf="diseaseShow" color="primary" item-end ios="ios-arrow-down" md="md-arrow-down"></ion-icon>
+                </ion-list-header>
+                <p *ngIf="question.data.include.length==0">暂无推荐！</p>
+                <ion-list class="no-marginTop" inset no-lines *ngIf="question.data.include.length>0 && diseaseShow">
+                  <ion-item *ngFor="let opt of question.data.include">
+                    <h2>{{opt.label}}</h2>
+                    <button  ion-button clear item-end>
+                      <span *ngIf="opt.dept_name && opt.dept_name!=='None'">{{opt.dept_name}}</span>
+                    </button>
+                  </ion-item>
+                </ion-list>
+              </div>
+
+              <hr *ngIf="diseaseShow" style="margin:0 1rem;"/>
+
+              <div class="finally">
+                <ion-list-header class="no-marginBottom" (click)="showRemoteillDetail('check')">
+                  检查
+                  <ion-icon *ngIf="!checkShow" color="primary" item-end ios="ios-arrow-forward" md="md-arrow-forward"></ion-icon>
+                  <ion-icon *ngIf="checkShow" color="primary" item-end ios="ios-arrow-down" md="md-arrow-down"></ion-icon>
+                </ion-list-header>
+                <p *ngIf="question.data.recommend_exam.length==0">暂无检查信息！</p>
+                <ion-list class="no-marginTop" inset no-lines *ngIf="question.data.recommend_exam.length>0 && checkShow">
+                  <ion-item *ngFor="let opt of question.data.recommend_exam">
+                    <h2>{{opt.label}}</h2>
+                  </ion-item>
+                </ion-list>
+              </div>
+            </div>
+            <div class="question-symptom" [hidden]="true">
+              <scroll  *ngIf="question.data && question.data.include.length>0"></scroll>
+            </div>
+          </div>
+
+          <div *ngIf="question.answer"  class="answer">
+            <p *ngIf="question.answer.length>0">
+              <span  *ngFor="let opt of question.answer;let idx = index">
+                <span *ngIf="opt.value">
+                  <span *ngIf="idx !=0">，</span>
+                  {{opt.value}}
+                   <span *ngIf="opt.unit">{{opt.unit}}</span>
+                </span>
+              </span>
+            </p>
+            <p *ngIf="question.answer.length==0">
+              <span>
+                 无
+              </span>
+            </p>
+          </div>
+          <p *ngIf="question.answer "><span  (click)="back(index,question)" class='back'>轻点编辑</span></p>
+        </li>
+      </ul>
+    </div>
+  </ion-list>
+</ion-content>

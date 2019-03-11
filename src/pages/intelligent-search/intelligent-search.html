@@ -1,0 +1,55 @@
+<ion-header>
+  <ion-toolbar no-border-top>
+    <ion-buttons start>
+      <button (click)="back()"  ion-button icon-only>
+        <ion-icon name="ios-arrow-back"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title></ion-title>
+    <ion-buttons end>
+      <!--<button   ion-button icon-only large="true"  round>
+        <ion-icon name="md-checkmark"></ion-icon> 确认
+      </button>-->
+      <a class="special-large-btn" (click)="confirm()" large="true"  ion-button round>
+        确认
+      </a>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-searchbar (ionInput)="getSymptom($event)" placeholder="请输入症状"></ion-searchbar>
+  <ion-list  *ngIf="!searchVal">
+    <div class="infi-row">
+      <!-- <ion-scroll scrollY="true">-->
+      <div class="infi-md-3">
+        <ul>
+          <li [ngClass]="{'active':opt.active}" (click)="changeChunk(opt)" *ngFor="let opt of treeData">
+            <ion-icon *ngIf="opt.active" color="primary" name="md-arrow-dropright"></ion-icon>
+            <a>{{opt.value}}</a>
+          </li>
+        </ul>
+      </div>
+      <!-- </ion-scroll>-->
+      <!--<ion-scroll scrollY="true">-->
+      <div class="infi-md-9">
+        <ul *ngIf="trunkData">
+          <li  *ngFor="let opt of trunkData">
+            <a [ngClass]="{'active':opt.active}" (click)="checkOptions(opt)" >{{opt.value}}</a>
+          </li>
+        </ul>
+      </div>
+      <!--</ion-scroll>-->
+    </div>
+  </ion-list>
+  <ion-list *ngIf="searchVal">
+    <div class="infi-row">
+      <div class="search-list">
+        <ul *ngIf="searchList">
+          <li  *ngFor="let opt of searchList">
+            <a [ngClass]="{'active':opt.active}" (click)="checkOptions(opt)" >{{opt.value}}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </ion-list>
+</ion-content>

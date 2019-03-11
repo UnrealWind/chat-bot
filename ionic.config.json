@@ -1,0 +1,7 @@
+{
+  "name": "MobileDisPlan",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "ionic-angular"
+}
